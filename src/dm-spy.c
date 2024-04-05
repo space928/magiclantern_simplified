@@ -33,6 +33,8 @@ void my_DebugMsg(int class, int level, char* fmt, ...)
         
     if (class == 21) // engio
         return;
+    if (class == 0x123456)
+        return;
     
     va_list            ap;
 
@@ -62,15 +64,26 @@ void debug_intercept()
 {
     if (!buf) // first call, intercept debug messages
     {
+        bmp_draw_rect(COLOR_BLACK, 0, 80, 600, 80);
+        bmp_draw_rect(COLOR_BLACK, 0, 80, 600, 80);
+        msleep(200);
         buf = fio_malloc(BUF_SIZE);
         
-        #if defined(CONFIG_DIGIC_V)
+        #if defined(CONFIG_DIGIC_V) || defined(CONFIG_DIGIC_VI)
         uint32_t d = (uint32_t)&DryosDebugMsg;
-        *(uint32_t*)(d) = B_INSTR((uint32_t)&DryosDebugMsg, my_DebugMsg);
+        bmp_printf(FONT_SMALL, 0, 80, "Hooking DebugMsg @ 0x%08x; my_DebugMsg = 0x%08x; patch = 0x%08x; buf = 0x%08x...", 
+            (uint32_t)&DryosDebugMsg, (uint32_t)&my_DebugMsg, THUMB_B_INSTR((uint32_t)&DryosDebugMsg, my_DebugMsg), (uint32_t)buf);
+        msleep(5000);
+        *(uint32_t*)(d) = THUMB_B_INSTR((uint32_t)&DryosDebugMsg, my_DebugMsg);
+        bmp_printf(FONT_LARGE, 0, 80, "Hook installed!", 
+            (uint32_t)&DryosDebugMsg, (uint32_t)&my_DebugMsg, (uint32_t)buf);
+        msleep(1000);
         #else
         cache_fake((uint32_t)&DryosDebugMsg, B_INSTR((uint32_t)&DryosDebugMsg, my_DebugMsg), TYPE_ICACHE);
         #endif
         NotifyBox(2000, "Now logging... ALL DebugMsg's :)", len);
+        my_DebugMsg(1, 1, "Lazy test...");
+        DryosDebugMsg(1, 1, "Hello World!");
     }
     else // subsequent call, save log to file
     {
@@ -79,6 +92,6 @@ void debug_intercept()
         NotifyBox(2000, "Saved %d bytes.", len);
         len = 0;
     }
-    beep();
+    info_led_blink(1, 100, 50);
 }
 

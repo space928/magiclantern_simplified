@@ -4,6 +4,9 @@
 // for devs to put custom code in debug.c run_test(),
 // and allowing triggering from a menu context.
 #define FEATURE_DONT_CLICK_ME
+#define CONFIG_HEXDUMP
+#define CONFIG_DEBUG_INTERCEPT // Needs cache hack
+//#define CONFIG_DEBUGMSG 1
 
 #define FEATURE_SHOW_SHUTTER_COUNT
 

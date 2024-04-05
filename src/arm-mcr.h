@@ -507,6 +507,29 @@ select_normal_vectors( void )
 #define ROR(val,count)   (ROR32(val,(count)%32))
 #define ROR32(val,count) (((val) >> (count))|((val) << (32-(count))))
 
+#define __REL(pc,dest) ( (((uint32_t)dest)&(~1)) - (((uint32_t)pc)&(~1)) - 4 )
+// Generates an unconditional branch operation. Only valid in thumb mode where the dest is < 2MB away from pc.
+#define THUMB_B_INSTR_BE(pc,dest) \
+    ( 0xf0009000 /* Fixed bits */ \
+    | ((__REL(pc,dest) >> 5) & 0x4000000) /* Sign bit*/ \
+    | ((__REL(pc,dest) << 4) & 0x3FF0000) /* imm10 -> 12:21 */ \
+    | (((~__REL(pc,dest) >> 10) ^ ((__REL(pc,dest) >> 18))) & 0x2000) /* j1 -> ~23 XOR Sign */ \
+    | (((~__REL(pc,dest) >> 11) ^ ((__REL(pc,dest) >> 20))) & 0x800) /* j2 -> ~22 XOR Sign */ \
+    | ((__REL(pc,dest) >> 1) & 0x00007FF) /* imm11 -> 1:11 */ \
+    )
+
+// Reverses the endianess of the two 16-bit words in a single 32 bit instruction
+#define __REV_ENDIANESS(x) \
+    ( (((x) & 0x000000ff) << 8) \
+    | (((x) & 0x0000ff00) >> 8) \
+    | (((x) & 0x00ff0000) << 8) \
+    | (((x) & 0xff000000) >> 8) \
+    )
+
+// I'm too lazy to rewrite this macro for LE, let the compiler do it
+// Generates an unconditional branch operation. Only valid in thumb mode where the dest is < 2MB away from pc.
+#define THUMB_B_INSTR(pc,dest) __REV_ENDIANESS(THUMB_B_INSTR_BE(pc, dest))
+
 /** Simple boot loader memcpy.
  *
  * \note This is not general purpose; len must be > 0 and must be % 4

@@ -649,6 +649,39 @@ static void run_test()
 {
     DryosDebugMsg(0, 15, "run_test fired");
 
+#if 1 && defined(CONFIG_750D)
+    // bmp_printf(FONT_SMALL, 0, 0, "Dumping RAM @ 0x40000000...");
+    // msleep(100);
+    // dump_big_seg(4, "RAM_4.bin");
+    // bmp_printf(FONT_SMALL, 0, 0, "Dumping RAM @ 0x00004000...");
+    // msleep(100);
+    // dump_seg((void*)0x4000, 0xfc000, "RAM0.bin");
+    bmp_printf(FONT_SMALL, 0, 0, "Dumping TCM_A @ 0x00000000...");
+    msleep(100);
+    void* ptr = malloc_aligned(0x4000, 8);
+    if(ptr)
+    {
+        memcpy64(ptr, (void*)0x0, 0x4000);
+        dump_seg(ptr, 0x4000, "TCM_A.bin");
+        free_aligned(ptr);
+    }
+
+    bmp_printf(FONT_SMALL, 0, 0, "Dumping TCM_B @ 0x80000000...");
+    msleep(100);
+    ptr = malloc_aligned(0x10000, 8);
+    if(ptr)
+    {
+        memcpy64(ptr, (void*)0x80000000, 0x10000);
+        dump_seg(ptr, 0x10000, "TCM_B.bin");
+        free_aligned(ptr);
+    }
+    //bmp_printf(FONT_SMALL, 0, 0, "Dumping MMIO @ 0xc0000000...");
+    //msleep(100);
+    //dump_big_seg(0xc, "MMIO.bin");
+    bmp_printf(FONT_SMALL, 0, 0, "SUCCESS!");
+    msleep(100);
+#endif
+
 #if 1 && defined(CONFIG_200D)
     // log multishot stuff
 //    dm_set_store_level(0xa6, 2);

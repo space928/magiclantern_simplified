@@ -52,18 +52,26 @@ def declare_string_section():
         print("    MODULE_STRING(__module_string_%s_name, __module_string_%s_value) \\" % (a, a))
     print("  MODULE_STRINGS_END()")
     
-def is_command_available(name):
-    """Check if command `name` is on PATH."""
-    import distutils.spawn
-    from distutils.spawn import find_executable
-    return find_executable(name) is not None
+def find_command(name):
+    """Check a command `name` in PATH."""
+    if sys.version_info >= (3, 3):
+        from shutil import which
+        return which(name)
+    else:
+        from distutils.spawn import find_executable
+        return find_executable(name)
 
 # return the first command of the list that can be found on the OS
-def get_command_of(commands):
+def get_command_of(commands: "list[str]"):
     """Return the first command of the list `commands` that can be found on the OS."""
     for command in commands: 
-        if is_command_available(command) == True:
-            return command
+        command_path = find_command(command)
+        if command_path is not None:
+            if command.endswith(".py"):
+                # Under wsl (and maybe other platforms too), it's possible that this tries to use the wrong python interpreter
+                return 'python3 \"' + command_path + '\"'
+            else:
+                return command
     print("\nCould not find " + "/".join(commands) + ".", sys.stderr)
     if "rst2html" in commands:
         print("Please install python-docutils (pip install docutils).", file=sys.stderr)

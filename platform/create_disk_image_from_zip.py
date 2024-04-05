@@ -39,19 +39,13 @@ def main():
         qcow_data = lzma.open(os.path.join("..", "sd.qcow2.xz")).read()
         outf.write(qcow_data)
 
-    # copy the new build into the image filesystem
+    # I couldn't get guestmount to work for me on wsl/ubuntu
+    # So, here's my janky solution (can you tell I'm not a linux user...)
+    # sd.qcow2 -> 7z -> qemu_disk_mount/ -> copy files -> mkisofs -o sd.iso qemu_disk_mount/ -> qemu-img convert sd.iso sd.qcow2
     try:
-        # guestmount requires libguestfs-tools, and won't work by default on Ubuntu
-        # because they're stupid: https://bugs.launchpad.net/ubuntu/+source/linux/+bug/759725
-        pid_file = "guestmount.pid"
-        subprocess.run(["guestmount", "--pid-file", pid_file,
-                        "-a", qcow_name,
-                        "-m", "/dev/sda1", qemu_mount_dir],
-                        check=True)
+        subprocess.run(["7z", "e", qcow_name, "-o" + qemu_mount_dir])
 
-        with open(pid_file, "r") as f:
-            pid = int(str(f.read()))
-
+        # Copy files
         old_autoexec = os.path.join(qemu_mount_dir, "autoexec.bin")
         if os.path.isfile(old_autoexec):
             os.remove(old_autoexec)
@@ -62,36 +56,22 @@ def main():
 
         with zipfile.ZipFile(args.build_zip, 'r') as z:
             z.extractall(qemu_mount_dir)
+        
+        # Make an iso
+        subprocess.run(["mkisofs", "-o", "tmp.iso", qemu_mount_dir])
+        # Now create a new disk image from that
+        subprocess.run(["qemu-img", "convert", "tmp.iso", qcow_name])
+    except Exception as ex:
+        print("Exception encountered while copying build to '{0}':\n\t{1}".format(qcow_name, ex))
     finally:
-        subprocess.run(["guestunmount", qemu_mount_dir])
+        # Clean up the temp dir
+        for root, dirs, files in os.walk(qemu_mount_dir, topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
         os.rmdir(qemu_mount_dir)
-
-    # Extraordinarily annoying, but libguestfs doesn't sync changes
-    # to the image file before guestunmount exits.  There's not even
-    # an option to do this.
-    #
-    # The manpage tells us we must wait for the guestmount pid
-    # we got earlier to exit.  How stupid.
-    if pid:
-        sleep(1) # on my system this is reliably enough time to wait
-        if is_pid(pid):
-            print("Waiting for guestmount to exit...")
-        timeout = 15
-        while is_pid(pid) and timeout:
-            sleep(1)
-            timeout -= 1
-        if timeout == 0:
-            # I've never observed this so don't know what mangled state
-            # we might be in.  Maybe we should cleanup image files?
-            print("Guestmount failed to exit, failing!")
-            sys.exit(-1)
-    else:
-        # we should raise earlier if guestmount errored and never get here,
-        # but just in case:
-        print("No pid obtained from guestmount.  Shouldn't be possible?")
-        sys.exit(-1)
-    if os.path.isfile(pid_file):
-        os.remove(pid_file)
+        os.remove("tmp.iso")
 
     # clone to the CF image if things went okay
     if os.path.isfile(qcow_name):

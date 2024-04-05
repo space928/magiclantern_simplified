@@ -1,6 +1,7 @@
 syntax: glob
-Makefile.*.user
-Makefile.user
+# I'm tracking changes to these files in my personal fork of the repo; make sure not to include these changes when merging back with the main repo!
+# Makefile.*.user
+# Makefile.user
 *.gpr
 *.gar
 *.qcow2

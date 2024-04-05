@@ -68,6 +68,12 @@ THUMB_FN(     0x268,  DryosDebugMsg)                        // lots of debug mes
 /** Eventprocs (call by name) **/
 THUMB_FN(0xfe445e02,  call)                                 // many functions called by name (lv_start, lv_stop etc)
 
+/** Events **/
+THUMB_FN(    0x2352,  TryPostEvent)                         // from "!IS_ERROR(TryPostEvent( ... ))" error messages
+THUMB_FN(    0x2394,  TryPostEvent_end)                     // from "!IS_ERROR(TryPostEvent( ... ))" error messages
+THUMB_FN(0xfe43842e,  TryPostStageEvent)                    // from "!IS_ERROR(TryPostStageEvent( ... ))" error messages
+THUMB_FN(0xfe438470,  TryPostStageEvent_end)                // from "!IS_ERROR(TryPostStageEvent( ... ))" error messages
+
 /** GUI timers **/
 THUMB_FN(0xfe31b7d6,  SetHPTimerNextTick)                   // same "worker" function as SetHPTimerAfterNow
 THUMB_FN(0xfe31b786,  SetHPTimerAfterNow)                   // from error message

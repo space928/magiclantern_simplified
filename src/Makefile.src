@@ -197,7 +197,10 @@ ML_SRC_OBJS = \
 	edmac-memcpy.o \
 	cache_hacks.o \
 	patch.o \
-	cache.o
+	cache.o \
+	dm-spy.o \
+	tp-spy.o \
+	reloc.o
 
 ML_OBJS-y += $(ML_SRC_OBJS)
 
