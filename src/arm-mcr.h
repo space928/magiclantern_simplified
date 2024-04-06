@@ -520,10 +520,10 @@ select_normal_vectors( void )
 
 // Reverses the endianess of the two 16-bit words in a single 32 bit instruction
 #define __REV_ENDIANESS(x) \
-    ( (((x) & 0x000000ff) << 8) \
-    | (((x) & 0x0000ff00) >> 8) \
-    | (((x) & 0x00ff0000) << 8) \
-    | (((x) & 0xff000000) >> 8) \
+    ( (((x) & 0x000000ff) << 16) \
+    | (((x) & 0x0000ff00) << 16) \
+    | (((x) & 0x00ff0000) >> 16) \
+    | (((x) & 0xff000000) >> 16) \
     )
 
 // I'm too lazy to rewrite this macro for LE, let the compiler do it
