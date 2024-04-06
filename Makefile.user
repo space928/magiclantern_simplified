@@ -19,13 +19,13 @@ else
 	STAT_CMD=stat -c "%n: %s bytes"
 endif
 
-INSTALL_DIR=$(call eval_once,INSTALL_DIR,$(realpath $(PLATFORM_DIR)/~install))
-define INSTALL_PREPARE=
-  mkdir -p $(PLATFORM_DIR)/~install
-endef
-define INSTALL_FINISH=
-  $(CP) $(INSTALL_DIR) $(CF_CARD)
-endef
+# define INSTALL_PREPARE=
+#   INSTALL_DIR=$(call eval_once,INSTALL_DIR,$(realpath $(PLATFORM_DIR)/~install))
+#   mkdir -p $(INSTALL_DIR)
+# endef
+# define INSTALL_FINISH=
+#   $(CP) $(INSTALL_DIR) $(CF_CARD)
+# endef
 
 # change this if you have to mount the card every time you run "make install"
 # examples:

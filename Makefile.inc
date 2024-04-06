@@ -95,8 +95,8 @@ disk_image: zip
 	$(PYTHON3) $(PLATFORM_PATH)/create_disk_image_from_zip.py magiclantern-$(VERSION).zip
 
 install_qemu:: | prepare_zip
-install_qemu:: install
-	$(call build,MTOOLS,cd $(QEMU_PATH)/; ./mtools_copy_ml.sh $(INSTALL_DIR))
+install_qemu:: install disk_image
+#	$(call build,MTOOLS,cd $(QEMU_PATH)/; ./mtools_copy_ml.sh $(INSTALL_DIR))
 
 clean::
 	$(call rm_dir, zip)
