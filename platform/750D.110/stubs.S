@@ -64,6 +64,7 @@ THUMB_FN(0xfe4445d2,  FIO_Flush)
 
 /** Debug messages **/
 THUMB_FN(     0x268,  DryosDebugMsg)                        // lots of debug messages; format string is third argument
+DATA_PTR(   0x2593c,  dm_names)                             // from DebugMsg; it's an array of pointers to class strings
 
 /** Eventprocs (call by name) **/
 THUMB_FN(0xfe445e02,  call)                                 // many functions called by name (lv_start, lv_stop etc)

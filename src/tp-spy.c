@@ -85,11 +85,8 @@ void tp_intercept()
 {
     if (!tp_buf) // first call, intercept debug messages
     {
-        return;
-
-        
-	tp_buf = fio_malloc(BUFF_SIZE);
-	tp_len = 0;
+	    tp_buf = fio_malloc(BUFF_SIZE);
+	    tp_len = 0;
 
     	if (!reloc_tp_buf) reloc_tp_buf = (uintptr_t) malloc(reloc_tp_len + 64);
         if (!reloc_tp_buf2) reloc_tp_buf2 = (uintptr_t) malloc(reloc_tp_len2 + 64);
@@ -116,12 +113,13 @@ void tp_intercept()
         uint32_t e = (uint32_t)&TryPostStageEvent;
         *(uint32_t*)(e) = B_INSTR((uint32_t)&TryPostStageEvent, my_TryPostStageEvent);
 #elif defined(CONFIG_DIGIC_VI)
-        uint32_t d = (uint32_t)&TryPostEvent;
-        *(uint32_t*)(d) = B_INSTR((uint32_t)&TryPostEvent, my_TryPostEvent);
+        // Currently reloc doesn't support Thumb instructions so hooking this is a bad idea
+        // uint32_t d = ((uint32_t)&TryPostEvent) & (~1);
+        // *(uint32_t*)(d) = THUMB_B_INSTR((uint32_t)&TryPostEvent, my_TryPostEvent);
 
         // This method doesn't exist in RAM and as such can't currently be patched
-        // uint32_t e = (uint32_t)&TryPostStageEvent;
-        // *(uint32_t*)(e) = B_INSTR((uint32_t)&TryPostStageEvent, my_TryPostStageEvent);
+        // uint32_t e = ((uint32_t)&TryPostStageEvent) & (~1);
+        // *(uint32_t*)(e) = THUMB_B_INSTR((uint32_t)&TryPostStageEvent, my_TryPostStageEvent);
 #else
        cache_fake((uint32_t)&TryPostEvent, B_INSTR((uint32_t)&TryPostEvent, my_TryPostEvent), TYPE_ICACHE);
        cache_fake((uint32_t)&TryPostStageEvent, B_INSTR((uint32_t)&TryPostStageEvent, my_TryPostStageEvent), TYPE_ICACHE);

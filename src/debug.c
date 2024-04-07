@@ -1600,12 +1600,14 @@ static struct menu_entry debug_menus[] = {
         .select      = run_in_separate_task,
         .help = "Log DebugMessages"
     },
+    #ifndef CONFIG_DIGIC_VI  // This feature requires relocating code; thumb code relocation is not implemented yet.
     {
         .name        = "TryPostEvent Log",
         .priv        = j_tp_intercept,
         .select      = run_in_separate_task,
         .help = "Log TryPostEvents"
     },
+    #endif
 #endif
 #ifdef FEATURE_SHOW_TASKS
     {
