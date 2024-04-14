@@ -117,8 +117,8 @@
     #define GUIMODE_PICQ 6
 
     // all these MVR ones are junk, don't try and record video and they probably don't get used?
-    #define MVR_190_STRUCT (*(void**)0x1ed8) // look in MVR_Initialize for AllocateMemory call;
-                                             // decompile it and see where ret_AllocateMemory is stored.
+#define MVR_190_STRUCT (*(void**)0x279a0) // look in MVR_Initialize for AllocateMemory call;
+                                         // decompile it and see where ret_AllocateMemory is stored.
     #define div_maybe(a,b) ((a)/(b))
     // see mvrGetBufferUsage, which is not really safe to call => err70
     // macros copied from arm-console
@@ -132,6 +132,7 @@
     #define MVR_FRAME_NUMBER (*(int*)(220 + MVR_190_STRUCT))
     //#define MVR_LAST_FRAME_SIZE (*(int*)(512 + MVR_752_STRUCT))
     #define MVR_BYTES_WRITTEN MEM((212 + MVR_190_STRUCT))
+#define MVR_MAX_RECORDING_DURATION MEM(0x40 + MVR_190_STRUCT)
 
     #define IMGPLAY_ZOOM_LEVEL_ADDR (0x2CBC) //wrong, code looks different
 

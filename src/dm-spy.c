@@ -29,12 +29,27 @@ static char* buf = 0;
 static int len = 0;
 static uint32_t msg_no = 0;
 
+static bool halted = false;
+
 void my_DebugMsg(int class, int level, char* fmt, ...)
 {
     if (!buf) return;
-        
+
+    #ifdef CONFIG_DM_SPY_FILTER
+    if (class != CONFIG_DM_SPY_FILTER)
+        return;
+    #else 
     if (class == 21) // engio
         return;
+    #endif
+
+    if(halted)
+        return;
+    // A lazy way to automatically pause stop the logging as soon as a particular message is sent...
+    /*if((uint32_t)fmt == 0xfe5566a0)
+    {
+        halted = true;
+    }*/
 
     va_list            ap;
 
@@ -88,6 +103,7 @@ void my_DebugMsg(int class, int level, char* fmt, ...)
 // call this from "don't click me"
 void debug_intercept()
 {
+    halted = false;
     if (!buf) // first call, intercept debug messages
     {
         buf = fio_malloc(BUF_SIZE);

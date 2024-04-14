@@ -74,6 +74,7 @@ THUMB_FN(    0x2352,  TryPostEvent)                         // from "!IS_ERROR(T
 THUMB_FN(    0x2394,  TryPostEvent_end)                     // from "!IS_ERROR(TryPostEvent( ... ))" error messages
 THUMB_FN(0xfe43842e,  TryPostStageEvent)                    // from "!IS_ERROR(TryPostStageEvent( ... ))" error messages
 THUMB_FN(0xfe438470,  TryPostStageEvent_end)                // from "!IS_ERROR(TryPostStageEvent( ... ))" error messages
+DATA_PTR(    0x3d38,  task_class_string)                    // "TaskClass" from TryPostEvent
 
 /** GUI timers **/
 THUMB_FN(0xfe31b7d6,  SetHPTimerNextTick)                   // same "worker" function as SetHPTimerAfterNow

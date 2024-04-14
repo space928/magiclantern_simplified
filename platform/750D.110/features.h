@@ -5,7 +5,9 @@
 // and allowing triggering from a menu context.
 #define FEATURE_DONT_CLICK_ME
 #define CONFIG_HEXDUMP
-#define CONFIG_DEBUG_INTERCEPT // Needs cache hack
+#define CONFIG_DEBUG_INTERCEPT
+// Use this to listen to only specific DebugMsg classes in dm_spy
+//#define CONFIG_DM_SPY_FILTER 0x2f // MVR
 //#define CONFIG_DEBUGMSG 1
 
 #define FEATURE_SHOW_SHUTTER_COUNT

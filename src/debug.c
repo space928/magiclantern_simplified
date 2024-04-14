@@ -22,6 +22,7 @@
 #include "fw-signature.h"
 #include "lvinfo.h"
 #include "raw.h"
+#include "tp-spy.h"
 
 #ifdef CONFIG_DEBUG_INTERCEPT
 #include "dm-spy.h"
@@ -64,7 +65,7 @@ void fake_halfshutter_step();
 
 #ifdef CONFIG_DEBUG_INTERCEPT
 void j_debug_intercept() { debug_intercept(); }
-void j_tp_intercept() { tp_intercept(); }
+void j_tp_intercept() { tp_log(); }
 #endif
 
 #if CONFIG_DEBUGMSG
@@ -644,42 +645,34 @@ static void change_mmu_tables_cpu1(void *arg)
 }
 #endif
 
+void debug_TryPostEvent(struct task_class* taskClass, void* sender, uint32_t eventCode, void* msg, uint32_t arg)
+{
+    if(eventCode == 0x1f && arg == 0x38)
+    {
+        *(uint32_t*)(msg+0x34) = 10;
+        DryosDebugMsg(0x2f, 0, "[HOOKED Event!] SRM_CalcAvailMovieOnCondition max_duration? = %d, task_name = %s", 
+            *(uint32_t*)(msg+0x34), taskClass->task_name);
+    }
+}
+
 int yuv_dump_sec = 0;
 static void run_test()
 {
     DryosDebugMsg(0, 15, "run_test fired");
 
 #if 1 && defined(CONFIG_750D)
-    // bmp_printf(FONT_SMALL, 0, 0, "Dumping RAM @ 0x40000000...");
-    // msleep(100);
-    // dump_big_seg(4, "RAM_4.bin");
-    // bmp_printf(FONT_SMALL, 0, 0, "Dumping RAM @ 0x00004000...");
-    // msleep(100);
-    // dump_seg((void*)0x4000, 0xfc000, "RAM0.bin");
-    bmp_printf(FONT_SMALL, 0, 0, "Dumping TCM_A @ 0x00000000...");
-    msleep(100);
-    void* ptr = malloc_aligned(0x4000, 8);
-    if(ptr)
-    {
-        memcpy64(ptr, (void*)0x0, 0x4000);
-        dump_seg(ptr, 0x4000, "TCM_A.bin");
-        free_aligned(ptr);
-    }
+    bmp_draw_rect(COLOR_BLACK, 0, 0, 500, 80);
+    bmp_draw_rect(COLOR_BLACK, 0, 0, 500, 80);
+    bmp_printf(FONT_MED, 0, 0, "MVR_data->maxRecordLength = %d", MVR_MAX_RECORDING_DURATION);
+    bmp_printf(FONT_MED, 0, 0, "MVR_data->maxRecordLength = %d", MVR_MAX_RECORDING_DURATION);
+    MVR_MAX_RECORDING_DURATION = 10;
 
-    bmp_printf(FONT_SMALL, 0, 0, "Dumping TCM_B @ 0x80000000...");
-    msleep(100);
-    ptr = malloc_aligned(0x10000, 8);
-    if(ptr)
-    {
-        memcpy64(ptr, (void*)0x80000000, 0x10000);
-        dump_seg(ptr, 0x10000, "TCM_B.bin");
-        free_aligned(ptr);
-    }
-    //bmp_printf(FONT_SMALL, 0, 0, "Dumping MMIO @ 0xc0000000...");
-    //msleep(100);
-    //dump_big_seg(0xc, "MMIO.bin");
-    bmp_printf(FONT_SMALL, 0, 0, "SUCCESS!");
-    msleep(100);
+    // Ok lets try hooking TryPostMessage...
+    register_tp_hook((struct tp_hook){
+        .name = "SRM_CalcAvailMovieOnCondition",
+        .func = &debug_TryPostEvent
+    });
+    DryosDebugMsg(0x2f, 0, "[HOOKED Event!] Hooking all events...");
 #endif
 
 #if 1 && defined(CONFIG_200D)
@@ -1600,14 +1593,12 @@ static struct menu_entry debug_menus[] = {
         .select      = run_in_separate_task,
         .help = "Log DebugMessages"
     },
-    #ifndef CONFIG_DIGIC_VI  // This feature requires relocating code; thumb code relocation is not implemented yet.
     {
         .name        = "TryPostEvent Log",
         .priv        = j_tp_intercept,
         .select      = run_in_separate_task,
         .help = "Log TryPostEvents"
     },
-    #endif
 #endif
 #ifdef FEATURE_SHOW_TASKS
     {

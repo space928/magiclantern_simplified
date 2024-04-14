@@ -75,6 +75,10 @@ extern const char * dm_names[];
 #define DM_GUI_E        133
 #define DM_BIND         137
 
+#define DM_LEVEL_INFO 0
+#define DM_LEVEL_WARN 0x26
+#define DM_LEVEL_ERROR 6
+
 struct dm_state
 {
         const char *            type; // off_0x00
