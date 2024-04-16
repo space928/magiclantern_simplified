@@ -655,12 +655,20 @@ void debug_TryPostEvent(struct task_class* taskClass, void* sender, uint32_t eve
     }
 }
 
+#include "patch_bp.h"
+
 int yuv_dump_sec = 0;
 static void run_test()
 {
     DryosDebugMsg(0, 15, "run_test fired");
 
 #if 1 && defined(CONFIG_750D)
+    // Patch testing
+    initialize_bp_patching();
+    
+#endif
+
+#if 0 && defined(CONFIG_750D)
     bmp_draw_rect(COLOR_BLACK, 0, 0, 500, 80);
     bmp_draw_rect(COLOR_BLACK, 0, 0, 500, 80);
     bmp_printf(FONT_MED, 0, 0, "MVR_data->maxRecordLength = %d", MVR_MAX_RECORDING_DURATION);

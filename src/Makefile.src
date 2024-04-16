@@ -200,7 +200,8 @@ ML_SRC_OBJS = \
 	cache.o \
 	dm-spy.o \
 	tp-spy.o \
-	reloc.o
+	reloc.o \
+	patch_bp.o
 
 ML_OBJS-y += $(ML_SRC_OBJS)
 
